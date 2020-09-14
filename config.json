@@ -1,0 +1,9 @@
+{
+  "debug": true,
+  "server": {
+    "address": ":4000"
+  },
+  "redis": {
+    "address": ":6379"
+  }
+}
