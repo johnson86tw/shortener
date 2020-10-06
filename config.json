@@ -5,5 +5,11 @@
   },
   "redis": {
     "address": ":6379"
+  },
+  "pg": {
+    "user": "postgres",
+    "password": "0",
+    "host": "localhost",
+    "port": 5432
   }
 }
