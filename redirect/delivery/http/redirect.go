@@ -35,7 +35,7 @@ func (r *redirectHandler) find(c *gin.Context) {
 
 func (r *redirectHandler) store(c *gin.Context) {
 	var body struct {
-		URL string
+		URL string `json:"url" binding:"required"`
 	}
 
 	err := c.ShouldBindJSON(&body)
