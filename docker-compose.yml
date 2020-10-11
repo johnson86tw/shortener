@@ -4,7 +4,7 @@ services:
   web:
     build: .
     ports:
-      - "4000:4000"
+      - "443:4000"
     depends_on:
       - redis
       - db
@@ -27,13 +27,11 @@ services:
       POSTGRES_PASSWORD: 0
     networks:
       - backend
-  pgadmin:
-    image: dpage/pgadmin4
-    ports:
-      - 5555:80
-    environment:
-      PGADMIN_DEFAULT_EMAIL: johnson@gmail.com
-      PGADMIN_DEFAULT_PASSWORD: 0
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+volumes:
+  pg_data:
 
 networks:
   backend:

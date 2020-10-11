@@ -1,10 +1,12 @@
 package service
 
 import (
+	"encoding/hex"
+	"math/rand"
 	"time"
 
 	"github.com/chnejohnson/shortener/domain"
-	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
 )
 
 // RedirectService ...
@@ -28,19 +30,29 @@ func (r *redirectService) Find(code string) (*domain.Redirect, error) {
 }
 
 // Store ...
-func (r *redirectService) Store(rdrt *domain.Redirect) error {
-	u, err := uuid.NewUUID()
-	if err != nil {
-		return err
-	}
+func (r *redirectService) Store(redirect *domain.Redirect) error {
+	// make redirect code
+	code := genURLCode()
+	logrus.WithField("code", code).Info("URL code has been generated")
 
-	rdrt.Code = u.String()
-	rdrt.CreatedAt = time.Now().UTC().Unix()
+	redirect.Code = code
 
-	err = r.redirectRepo.Store(rdrt)
+	err := r.redirectRepo.Store(redirect)
 	if err != nil {
+		logrus.Error("Fail to store redirect")
 		return err
 	}
 
 	return nil
+}
+
+func genURLCode() string {
+	seed := time.Now().UnixNano()
+	source := rand.NewSource(seed)
+	r := rand.New(source)
+
+	b := make([]byte, 4)
+	r.Read(b)
+	s := hex.EncodeToString(b)
+	return s
 }

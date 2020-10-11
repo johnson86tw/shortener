@@ -1,15 +1,20 @@
 package main
 
 import (
+	"context"
 	"log"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
+	"github.com/jackc/pgx/v4"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
 	_redirectHttpDelivery "github.com/chnejohnson/shortener/redirect/delivery/http"
-	_redisRepo "github.com/chnejohnson/shortener/redirect/repository/redis"
 	_redirectService "github.com/chnejohnson/shortener/redirect/service"
+
+	_pgRepo "github.com/chnejohnson/shortener/redirect/repository/postgres"
 )
 
 func init() {
@@ -30,6 +35,7 @@ func init() {
 func main() {
 	redisAddr := viper.GetString("redis.address")
 	serverAddr := viper.GetString("server.address")
+	pgConfig := viper.GetStringMapString("pg")
 
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     redisAddr,
@@ -38,50 +44,39 @@ func main() {
 	})
 
 	if _, err := rdb.Ping().Result(); err != nil {
-		panic(err)
+		logrus.Warn("Cannot connect to redis")
 	}
 
-	// config := viper.GetStringMapString("pg")
-	// dsn := []string{}
-	// for key, val := range config {
-	// 	s := key + "=" + val
-	// 	dsn = append(dsn, s)
-	// }
+	dsn := []string{}
+	for key, val := range pgConfig {
+		s := key + "=" + val
+		dsn = append(dsn, s)
+	}
 
-	// pgConn, err := pgx.Connect(context.Background(), strings.Join(dsn, " "))
-	// if err != nil {
-	// 	log.Panic(err)
-	// }
+	pgConn, err := pgx.Connect(context.Background(), strings.Join(dsn, " "))
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// defer pgConn.Close(context.Background())
+	defer func() {
+		err := pgConn.Close(context.Background())
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
 
-	// rows, err := pgConn.Query(context.Background(), "SELECT * FROM url_table;")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// defer rows.Close()
-
-	// rdrts := []*domain.Redirect{}
-
-	// for rows.Next() {
-	// 	var id int
-	// 	var createdAt interface{}
-
-	// 	rdrt := &domain.Redirect{}
-	// 	err := rows.Scan(&id, &rdrt.URL, &rdrt.Code, &createdAt)
-	// 	if err != nil {
-	// 		log.Panic(err)
-	// 	}
-
-	// 	rdrts = append(rdrts, rdrt)
-	// }
-
+	// Setting gin and middleware
 	g := gin.Default()
 
-	redisRepo := _redisRepo.NewRedisRedirectRepository(rdb)
-	redirectService := _redirectService.NewRedirectService(redisRepo)
-	_redirectHttpDelivery.NewRedirectHandler(g, redirectService)
+	// compose redis
+	// redisRepo := _redisRepo.NewRedisRedirectRepository(rdb)
+	// rdbService := _redirectService.NewRedirectService(redisRepo)
+	// _redirectHttpDelivery.NewRedirectHandler(g, rdbService)
+
+	// compose postgres
+	pgRepo := _pgRepo.NewRepository(pgConn)
+	pgService := _redirectService.NewRedirectService(pgRepo)
+	_redirectHttpDelivery.NewRedirectHandler(g, pgService)
 
 	g.Run(serverAddr)
 }

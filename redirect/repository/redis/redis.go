@@ -2,7 +2,6 @@ package redis
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/chnejohnson/shortener/domain"
 	"github.com/go-redis/redis"
@@ -27,14 +26,8 @@ func (r *redisRedirectRepository) Find(code string) (*domain.Redirect, error) {
 		return nil, err
 	}
 
-	createdAt, err := strconv.ParseInt(data["CreatedAt"], 10, 64)
-	if err != nil {
-		return nil, err
-	}
-
 	rdrt.URL = data["URL"]
 	rdrt.Code = data["Code"]
-	rdrt.CreatedAt = createdAt
 
 	return &rdrt, nil
 }

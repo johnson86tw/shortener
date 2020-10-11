@@ -4,7 +4,7 @@
     "address": ":4000"
   },
   "redis": {
-    "address": "redis:6379"
+    "address": "localhost:6379"
   },
   "pg": {
     "user": "postgres",

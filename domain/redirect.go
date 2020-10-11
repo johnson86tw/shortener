@@ -1,10 +1,12 @@
 package domain
 
+import "time"
+
 // Redirect ...
 type Redirect struct {
 	URL       string
 	Code      string
-	CreatedAt int64
+	CreatedAt time.Time
 }
 
 // RedirectService ...
