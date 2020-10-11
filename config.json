@@ -11,5 +11,9 @@
     "password": "0",
     "host": "localhost",
     "port": 5432
+  },
+  "jwt":{
+    "secretKey": "secret",
+    "tokenLifeTime": 10
   }
 }

@@ -4,9 +4,9 @@ import "time"
 
 // Redirect ...
 type Redirect struct {
-	URL       string
-	Code      string
-	CreatedAt time.Time
+	URL       string    `json:"url"`
+	Code      string    `json:"code"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 // RedirectService ...

@@ -2,6 +2,7 @@ package service
 
 import (
 	"encoding/hex"
+	"errors"
 	"math/rand"
 	"time"
 
@@ -31,6 +32,10 @@ func (r *redirectService) Find(code string) (*domain.Redirect, error) {
 
 // Store ...
 func (r *redirectService) Store(redirect *domain.Redirect) error {
+	if redirect.URL == "" {
+		logrus.Error("Redirect URL should not be empty")
+		return errors.New("Redirect URL should not be empty")
+	}
 	// make redirect code
 	code := genURLCode()
 	logrus.WithField("code", code).Info("URL code has been generated")
