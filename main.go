@@ -11,10 +11,12 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
+	"github.com/chnejohnson/shortener/domain"
 	_redirectHttpDelivery "github.com/chnejohnson/shortener/redirect/delivery/http"
 	_redirectService "github.com/chnejohnson/shortener/redirect/service"
 
-	_pgRepo "github.com/chnejohnson/shortener/redirect/repository/postgres"
+	_accountRepo "github.com/chnejohnson/shortener/account/repository/postgres"
+	_redirectRepo "github.com/chnejohnson/shortener/redirect/repository/postgres"
 )
 
 func init() {
@@ -74,9 +76,28 @@ func main() {
 	// _redirectHttpDelivery.NewRedirectHandler(g, rdbService)
 
 	// compose postgres
-	pgRepo := _pgRepo.NewRepository(pgConn)
+	pgRepo := _redirectRepo.NewRepository(pgConn)
 	pgService := _redirectService.NewRedirectService(pgRepo)
 	_redirectHttpDelivery.NewRedirectHandler(g, pgService)
+
+	accountRepo := _accountRepo.NewRepository(pgConn)
+
+	account := &domain.Account{}
+	account.Email = "grace@gmail.com"
+	account.Password = "1234"
+	account.Name = "grace"
+
+	err = accountRepo.Create(account)
+	if err != nil {
+		logrus.Error(err)
+	}
+
+	password, err := accountRepo.Find("grace@gmail.com")
+	if err != nil {
+		logrus.Error(err)
+	} else {
+		logrus.WithField("password", password).Info("Get Password!")
+	}
 
 	g.Run(serverAddr)
 }
