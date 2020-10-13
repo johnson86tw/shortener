@@ -17,15 +17,15 @@ type Account struct {
 // AccountService ...
 type AccountService interface {
 	Create(*Account) error
-	Fetch(userID string) (*Account, error)
-	Update(*Account) error
-	Delete(*Account) error
+	Login(email string, password string) error
+	// Update(*Account) error
+	// Delete(*Account) error
 }
 
 // AccountRepository ...
 type AccountRepository interface {
 	Create(*Account) error
-	Find(acc string) (string, error)
+	Find(email string) (string, error)
 	// Fetch(userID string) (*Account, error)
 	// Update(*Account) error
 	// Delete(*Account) error

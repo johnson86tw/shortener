@@ -16,6 +16,7 @@ import (
 	_redirectService "github.com/chnejohnson/shortener/redirect/service"
 
 	_accountRepo "github.com/chnejohnson/shortener/account/repository/postgres"
+	_accountService "github.com/chnejohnson/shortener/account/service"
 	_redirectRepo "github.com/chnejohnson/shortener/redirect/repository/postgres"
 )
 
@@ -77,26 +78,30 @@ func main() {
 
 	// compose postgres
 	pgRepo := _redirectRepo.NewRepository(pgConn)
-	pgService := _redirectService.NewRedirectService(pgRepo)
-	_redirectHttpDelivery.NewRedirectHandler(g, pgService)
+	rs := _redirectService.NewRedirectService(pgRepo)
+	_redirectHttpDelivery.NewRedirectHandler(g, rs)
 
 	accountRepo := _accountRepo.NewRepository(pgConn)
+	as := _accountService.NewAccountService(accountRepo)
 
-	account := &domain.Account{}
-	account.Email = "grace@gmail.com"
-	account.Password = "1234"
-	account.Name = "grace"
+	// try
+	acc := &domain.Account{}
+	acc.Name = "Howard"
+	acc.Email = "howard@gmail.com"
+	acc.Password = "23"
 
-	err = accountRepo.Create(account)
-	if err != nil {
-		logrus.Error(err)
-	}
-
-	password, err := accountRepo.Find("grace@gmail.com")
+	err = as.Create(acc)
 	if err != nil {
 		logrus.Error(err)
 	} else {
-		logrus.WithField("password", password).Info("Get Password!")
+		logrus.Info("Succeed to sign up")
+	}
+
+	err = as.Login("howard@gmail.com", "23")
+	if err != nil {
+		logrus.Error(err)
+	} else {
+		logrus.Info("Succeed to login")
 	}
 
 	g.Run(serverAddr)

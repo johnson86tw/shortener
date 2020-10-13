@@ -25,7 +25,6 @@ func (p *pgAccountRepo) Create(a *domain.Account) error {
 
 	_, err := p.conn.Exec(context.Background(), sql, a.Name, a.Email, a.Password)
 	if err != nil {
-		logrus.Error(err)
 		return err
 	}
 
@@ -39,16 +38,15 @@ func (p *pgAccountRepo) Create(a *domain.Account) error {
 }
 
 // Fetch ...
-func (p *pgAccountRepo) Find(acc string) (string, error) {
+func (p *pgAccountRepo) Find(email string) (string, error) {
 	sql := `
 	SELECT password
 	FROM users 
 	WHERE email = $1;`
 
 	var password string
-	err := p.conn.QueryRow(context.Background(), sql, acc).Scan(&password)
+	err := p.conn.QueryRow(context.Background(), sql, email).Scan(&password)
 	if err != nil {
-		logrus.Error(err)
 		return "", err
 	}
 
