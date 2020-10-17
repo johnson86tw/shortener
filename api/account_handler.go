@@ -16,31 +16,11 @@ type AccountHandler struct {
 	*JWT
 }
 
-// // try
-// acc := &domain.Account{}
-// acc.Name = "Howard"
-// acc.Email = "howard@gmail.com"
-// acc.Password = "23"
-
-// err = as.Create(acc)
-// if err != nil {
-// 	logrus.Error(err)
-// } else {
-// 	logrus.Info("Succeed to sign up")
-// }
-
-// err = as.Login("howard@gmail.com", "23")
-// if err != nil {
-// 	logrus.Error(err)
-// } else {
-// 	logrus.Info("Succeed to login")
-// }
-
 // NewAccountHandler ...
 func NewAccountHandler(r *gin.Engine, as domain.AccountService, j *JWT) {
 	h := &AccountHandler{as, j}
 	r.POST("/signup", h.Signup)
-	r.POST("login", h.Login)
+	r.POST("/login", h.Login)
 }
 
 // Signup ...
@@ -121,6 +101,7 @@ func (h *AccountHandler) Login(c *gin.Context) {
 			Subject:   body.Email,
 		},
 	}
+
 	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	token, err := tokenClaims.SignedString(h.JWTSecret)
 	if err != nil {
@@ -135,3 +116,23 @@ func (h *AccountHandler) Login(c *gin.Context) {
 	})
 
 }
+
+// // try
+// acc := &domain.Account{}
+// acc.Name = "Howard"
+// acc.Email = "howard@gmail.com"
+// acc.Password = "23"
+
+// err = as.Create(acc)
+// if err != nil {
+// 	logrus.Error(err)
+// } else {
+// 	logrus.Info("Succeed to sign up")
+// }
+
+// err = as.Login("howard@gmail.com", "23")
+// if err != nil {
+// 	logrus.Error(err)
+// } else {
+// 	logrus.Info("Succeed to login")
+// }

@@ -15,7 +15,7 @@ import (
 	_accountRepo "github.com/chnejohnson/shortener/service/account/repository/postgres"
 	_accountService "github.com/chnejohnson/shortener/service/account/service"
 
-	controller "github.com/chnejohnson/shortener/controller"
+	api "github.com/chnejohnson/shortener/api"
 )
 
 func init() {
@@ -39,7 +39,7 @@ func main() {
 	pgConfig := viper.GetStringMapString("pg")
 	jwtSecret := viper.GetString("jwt.secret")
 
-	j := &controller.JWT{JWTSecret: []byte(jwtSecret)}
+	j := &api.JWT{JWTSecret: []byte(jwtSecret)}
 
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     redisAddr,
@@ -71,14 +71,13 @@ func main() {
 
 	accountRepo := _accountRepo.NewRepository(pgConn)
 	as := _accountService.NewAccountService(accountRepo)
-	// _accountHttpDelivery.NewAccountHandler(router, as, jwtSecret)
 
 	// pgRepo := _redirectRepo.NewRepository(pgConn)
 	// redirectService := _redirectService.NewRedirectService(pgRepo)
 
-	// Controller
+	// api
 	engine := gin.Default()
-	controller.NewAccountHandler(engine, as, j)
+	api.NewAccountHandler(engine, as, j)
 
 	authorized := engine.Group("/auth")
 	authorized.Use(j.AuthRequired)
