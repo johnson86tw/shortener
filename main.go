@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -11,13 +12,10 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
-	"github.com/chnejohnson/shortener/domain"
-	_redirectHttpDelivery "github.com/chnejohnson/shortener/redirect/delivery/http"
-	_redirectService "github.com/chnejohnson/shortener/redirect/service"
+	_accountRepo "github.com/chnejohnson/shortener/service/account/repository/postgres"
+	_accountService "github.com/chnejohnson/shortener/service/account/service"
 
-	_accountRepo "github.com/chnejohnson/shortener/account/repository/postgres"
-	_accountService "github.com/chnejohnson/shortener/account/service"
-	_redirectRepo "github.com/chnejohnson/shortener/redirect/repository/postgres"
+	controller "github.com/chnejohnson/shortener/controller"
 )
 
 func init() {
@@ -39,6 +37,9 @@ func main() {
 	redisAddr := viper.GetString("redis.address")
 	serverAddr := viper.GetString("server.address")
 	pgConfig := viper.GetStringMapString("pg")
+	jwtSecret := viper.GetString("jwt.secret")
+
+	j := &controller.JWT{JWTSecret: []byte(jwtSecret)}
 
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     redisAddr,
@@ -68,41 +69,32 @@ func main() {
 		}
 	}()
 
-	// Setting gin and middleware
-	g := gin.Default()
+	accountRepo := _accountRepo.NewRepository(pgConn)
+	as := _accountService.NewAccountService(accountRepo)
+	// _accountHttpDelivery.NewAccountHandler(router, as, jwtSecret)
+
+	// pgRepo := _redirectRepo.NewRepository(pgConn)
+	// redirectService := _redirectService.NewRedirectService(pgRepo)
+
+	// Controller
+	engine := gin.Default()
+	controller.NewAccountHandler(engine, as, j)
+
+	authorized := engine.Group("/auth")
+	authorized.Use(j.AuthRequired)
+
+	{
+		authorized.GET("/profile", func(c *gin.Context) {
+			c.JSON(http.StatusOK, gin.H{
+				"message": "success",
+			})
+		})
+	}
 
 	// compose redis
 	// redisRepo := _redisRepo.NewRedisRedirectRepository(rdb)
 	// rdbService := _redirectService.NewRedirectService(redisRepo)
 	// _redirectHttpDelivery.NewRedirectHandler(g, rdbService)
 
-	// compose postgres
-	pgRepo := _redirectRepo.NewRepository(pgConn)
-	rs := _redirectService.NewRedirectService(pgRepo)
-	_redirectHttpDelivery.NewRedirectHandler(g, rs)
-
-	accountRepo := _accountRepo.NewRepository(pgConn)
-	as := _accountService.NewAccountService(accountRepo)
-
-	// try
-	acc := &domain.Account{}
-	acc.Name = "Howard"
-	acc.Email = "howard@gmail.com"
-	acc.Password = "23"
-
-	err = as.Create(acc)
-	if err != nil {
-		logrus.Error(err)
-	} else {
-		logrus.Info("Succeed to sign up")
-	}
-
-	err = as.Login("howard@gmail.com", "23")
-	if err != nil {
-		logrus.Error(err)
-	} else {
-		logrus.Info("Succeed to login")
-	}
-
-	g.Run(serverAddr)
+	engine.Run(serverAddr)
 }

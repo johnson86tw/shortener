@@ -13,7 +13,7 @@
     "port": 5432
   },
   "jwt": {
-    "secretKey": "secret",
+    "secret": "secret",
     "tokenLifeTime": 10
   }
 }
