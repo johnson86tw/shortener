@@ -15,17 +15,17 @@ type RedirectHandler struct {
 // NewRedirectHandler ...
 func NewRedirectHandler(engine *gin.Engine, rs domain.RedirectService) {
 	h := &RedirectHandler{rs}
-	engine.GET("/:code", h.find)
+	engine.GET("/:code", h.redirect)
 	engine.POST("/", h.store)
 }
 
-func (r *RedirectHandler) find(c *gin.Context) {
+func (r *RedirectHandler) redirect(c *gin.Context) {
 	code := c.Params.ByName("code")
 
 	redirect, err := r.Find(code)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "取得重導連結失敗",
+			"error": "Fail to get redirect url",
 		})
 		return
 	}

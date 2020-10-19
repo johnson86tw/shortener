@@ -25,19 +25,3 @@ type RedirectRepository interface {
 	Find(string) (*Redirect, error)
 	Store(*Redirect) error
 }
-
-// UserRedirectService ...
-type UserRedirectService interface {
-	FetchAll(userID string) ([]*Redirect, error)
-	Add(userID string, redirect *Redirect) error
-	Edit(code string) error
-	Delete(code string) error
-}
-
-// UserRedirectRepository ...
-type UserRedirectRepository interface {
-	FetchAll(userID string) ([]*Redirect, error)
-	Add(userID string, redirect *Redirect) error
-	Edit(code string) error
-	Delete(code string) error
-}

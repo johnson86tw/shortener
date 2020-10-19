@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -16,6 +18,9 @@ import (
 
 	redirectRepo "github.com/chnejohnson/shortener/service/redirect/repository/postgres"
 	redirectService "github.com/chnejohnson/shortener/service/redirect/service"
+
+	userURLRepo "github.com/chnejohnson/shortener/service/user_url/repository/postgres"
+	userURLService "github.com/chnejohnson/shortener/service/user_url/service"
 
 	api "github.com/chnejohnson/shortener/api"
 )
@@ -92,6 +97,22 @@ func main() {
 	// 		})
 	// 	})
 	// }
+	userURLRepo := userURLRepo.NewRepository(pgConn)
+	userURLService := userURLService.NewUserURLService(userURLRepo)
+
+	id, err := uuid.Parse("4425ff13-354f-4e45-897f-ac76476305d5")
+	if err != nil {
+		logrus.Error(err)
+	}
+
+	urls, err := userURLService.FetchAll(id)
+	if err != nil {
+		logrus.Error(err)
+	}
+
+	for _, u := range urls {
+		fmt.Println(*u)
+	}
 
 	engine.Run(serverAddr)
 }
