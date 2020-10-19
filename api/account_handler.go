@@ -1,4 +1,4 @@
-package controller
+package api
 
 import (
 	"net/http"
@@ -12,19 +12,19 @@ import (
 
 // AccountHandler ...
 type AccountHandler struct {
-	as domain.AccountService
+	domain.AccountService
 	*JWT
 }
 
 // NewAccountHandler ...
 func NewAccountHandler(r *gin.Engine, as domain.AccountService, j *JWT) {
 	h := &AccountHandler{as, j}
-	r.POST("/signup", h.Signup)
-	r.POST("/login", h.Login)
+	r.POST("/signup", h.signup)
+	r.POST("/login", h.login)
 }
 
 // Signup ...
-func (h *AccountHandler) Signup(c *gin.Context) {
+func (h *AccountHandler) signup(c *gin.Context) {
 	var body struct {
 		Email    string
 		Password string
@@ -44,7 +44,7 @@ func (h *AccountHandler) Signup(c *gin.Context) {
 	acc.Password = body.Password
 	acc.Name = body.Name
 
-	err = h.as.Create(acc)
+	err = h.Create(acc)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -59,7 +59,7 @@ func (h *AccountHandler) Signup(c *gin.Context) {
 }
 
 // Login ...
-func (h *AccountHandler) Login(c *gin.Context) {
+func (h *AccountHandler) login(c *gin.Context) {
 
 	var body struct {
 		Email    string
@@ -75,7 +75,7 @@ func (h *AccountHandler) Login(c *gin.Context) {
 	}
 
 	// service
-	err = h.as.Login(body.Email, body.Password)
+	err = h.Login(body.Email, body.Password)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"message": "Unauthorized",

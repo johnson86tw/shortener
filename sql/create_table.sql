@@ -8,6 +8,10 @@ create table urls (
 -- 新增 url
 INSERT INTO public.urls (url, code) VALUES('http://www.fake.com', 'abc');
 
+
+-- 安裝產 uuid 的套件
+create extension "uuid-ossp";
+
 create table users (
 	user_id uuid not null default uuid_generate_v4(),
 	name varchar(64),
@@ -19,8 +23,7 @@ create table users (
 	primary key (user_id)
 );
 
--- 安裝產 uuid 的套件
-create extension "uuid-ossp";
+
 
 -- 新增 user
 INSERT INTO public.users

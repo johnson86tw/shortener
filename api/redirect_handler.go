@@ -1,4 +1,4 @@
-package http
+package api
 
 import (
 	"net/http"
@@ -7,22 +7,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type redirectHandler struct {
-	service domain.RedirectService
+// RedirectHandler ...
+type RedirectHandler struct {
+	domain.RedirectService
 }
 
 // NewRedirectHandler ...
-func NewRedirectHandler(g *gin.Engine, service domain.RedirectService) {
-	handler := &redirectHandler{service}
-
-	g.GET("/:code", handler.find)
-	g.POST("/", handler.store)
+func NewRedirectHandler(engine *gin.Engine, rs domain.RedirectService) {
+	h := &RedirectHandler{rs}
+	engine.GET("/:code", h.find)
+	engine.POST("/", h.store)
 }
 
-func (r *redirectHandler) find(c *gin.Context) {
+func (r *RedirectHandler) find(c *gin.Context) {
 	code := c.Params.ByName("code")
 
-	redirect, err := r.service.Find(code)
+	redirect, err := r.Find(code)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "取得重導連結失敗",
@@ -33,7 +33,7 @@ func (r *redirectHandler) find(c *gin.Context) {
 	c.Redirect(http.StatusFound, redirect.URL)
 }
 
-func (r *redirectHandler) store(c *gin.Context) {
+func (r *RedirectHandler) store(c *gin.Context) {
 	var body struct {
 		URL string `json:"url" binding:"required"`
 	}
@@ -49,7 +49,7 @@ func (r *redirectHandler) store(c *gin.Context) {
 	redirect := &domain.Redirect{}
 	redirect.URL = body.URL
 
-	err = r.service.Store(redirect)
+	err = r.Store(redirect)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),

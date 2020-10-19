@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"log"
-	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -12,8 +11,11 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
-	_accountRepo "github.com/chnejohnson/shortener/service/account/repository/postgres"
-	_accountService "github.com/chnejohnson/shortener/service/account/service"
+	accountRepo "github.com/chnejohnson/shortener/service/account/repository/postgres"
+	accountService "github.com/chnejohnson/shortener/service/account/service"
+
+	redirectRepo "github.com/chnejohnson/shortener/service/redirect/repository/postgres"
+	redirectService "github.com/chnejohnson/shortener/service/redirect/service"
 
 	api "github.com/chnejohnson/shortener/api"
 )
@@ -69,31 +71,32 @@ func main() {
 		}
 	}()
 
-	accountRepo := _accountRepo.NewRepository(pgConn)
-	as := _accountService.NewAccountService(accountRepo)
-
-	// pgRepo := _redirectRepo.NewRepository(pgConn)
-	// redirectService := _redirectService.NewRedirectService(pgRepo)
+	// service
+	accountRepo := accountRepo.NewRepository(pgConn)
+	as := accountService.NewAccountService(accountRepo)
+	redirectRepo := redirectRepo.NewRepository(pgConn)
+	rs := redirectService.NewRedirectService(redirectRepo)
 
 	// api
 	engine := gin.Default()
 	api.NewAccountHandler(engine, as, j)
+	api.NewRedirectHandler(engine, rs)
 
-	authorized := engine.Group("/auth")
-	authorized.Use(j.AuthRequired)
+	// authorized := engine.Group("/auth")
+	// authorized.Use(j.AuthRequired)
 
-	{
-		authorized.GET("/profile", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{
-				"message": "success",
-			})
-		})
-	}
-
-	// compose redis
-	// redisRepo := _redisRepo.NewRedisRedirectRepository(rdb)
-	// rdbService := _redirectService.NewRedirectService(redisRepo)
-	// _redirectHttpDelivery.NewRedirectHandler(g, rdbService)
+	// {
+	// 	authorized.GET("/profile", func(c *gin.Context) {
+	// 		c.JSON(http.StatusOK, gin.H{
+	// 			"message": "success",
+	// 		})
+	// 	})
+	// }
 
 	engine.Run(serverAddr)
 }
+
+// compose redis
+// redisRepo := _redisRepo.NewRedisRedirectRepository(rdb)
+// rdbService := _redirectService.NewRedirectService(redisRepo)
+// _redirectHttpDelivery.NewRedirectHandler(g, rdbService)

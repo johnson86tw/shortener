@@ -11,18 +11,18 @@ import (
 )
 
 // RedirectService ...
-type redirectService struct {
-	redirectRepo domain.RedirectRepository
+type RedirectService struct {
+	db domain.RedirectRepository
 }
 
 // NewRedirectService ...
-func NewRedirectService(repo domain.RedirectRepository) domain.RedirectService {
-	return &redirectService{repo}
+func NewRedirectService(db domain.RedirectRepository) domain.RedirectService {
+	return &RedirectService{db}
 }
 
 // Find ...
-func (r *redirectService) Find(code string) (*domain.Redirect, error) {
-	rdrt, err := r.redirectRepo.Find(code)
+func (r *RedirectService) Find(code string) (*domain.Redirect, error) {
+	rdrt, err := r.db.Find(code)
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +31,7 @@ func (r *redirectService) Find(code string) (*domain.Redirect, error) {
 }
 
 // Store ...
-func (r *redirectService) Store(redirect *domain.Redirect) error {
+func (r *RedirectService) Store(redirect *domain.Redirect) error {
 	if redirect.URL == "" {
 		logrus.Error("Redirect URL should not be empty")
 		return errors.New("Redirect URL should not be empty")
@@ -42,7 +42,7 @@ func (r *redirectService) Store(redirect *domain.Redirect) error {
 
 	redirect.Code = code
 
-	err := r.redirectRepo.Store(redirect)
+	err := r.db.Store(redirect)
 	if err != nil {
 		logrus.Error("Fail to store redirect")
 		return err
