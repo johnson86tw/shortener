@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"log"
-	"net/http"
 	"strings"
 
 	"github.com/go-redis/redis"
@@ -20,6 +19,8 @@ import (
 	redirectService "github.com/chnejohnson/shortener/service/redirect/service"
 
 	api "github.com/chnejohnson/shortener/api"
+	userURLRepo "github.com/chnejohnson/shortener/service/user_url/repository/postgres"
+	userURLService "github.com/chnejohnson/shortener/service/user_url/service"
 )
 
 func init() {
@@ -66,52 +67,30 @@ func main() {
 		}
 	}()
 
+	// web framework
 	app := echo.New()
 
 	// middleware
 	app.Use(middleware.Logger())
 	app.Use(middleware.Recover())
 
-	// service
+	// basic
 	accountRepo := accountRepo.NewRepository(pgConn)
 	as := accountService.NewAccountService(accountRepo)
 	redirectRepo := redirectRepo.NewRepository(pgConn)
 	rs := redirectService.NewRedirectService(redirectRepo)
+
 	api.NewAccountHandler(app, as, j)
 	api.NewRedirectHandler(app, rs)
 
-	// api
+	// auth
 	auth := app.Group("/auth")
 	auth.Use(j.AuthRequired)
-
 	{
-		auth.GET("/profile", func(c echo.Context) error {
-			return c.JSON(http.StatusOK, map[string]interface{}{
-				"message": "success",
-			})
-		})
+		userURLRepo := userURLRepo.NewRepository(pgConn)
+		us := userURLService.NewUserURLService(userURLRepo)
+		api.NewUserURLHandler(auth, us)
 	}
 
-	// userURLRepo := userURLRepo.NewRepository(pgConn)
-	// userURLService := userURLService.NewUserURLService(userURLRepo)
 	app.Logger.Fatal(app.Start(serverAddr))
 }
-
-// compose redis
-// redisRepo := _redisRepo.NewRedisRedirectRepository(rdb)
-// rdbService := _redirectService.NewRedirectService(redisRepo)
-// _redirectHttpDelivery.NewRedirectHandler(g, rdbService)
-
-// id, err := uuid.Parse("4425ff13-354f-4e45-897f-ac76476305d5")
-// if err != nil {
-// 	logrus.Error(err)
-// }
-
-// urls, err := userURLService.FetchAll(id)
-// if err != nil {
-// 	logrus.Error(err)
-// }
-
-// for _, u := range urls {
-// 	fmt.Println(*u)
-// }

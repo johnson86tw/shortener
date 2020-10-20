@@ -79,7 +79,7 @@ func (h *AccountHandler) login(c echo.Context) error {
 	// service
 	uuid, err := h.Login(body.Email, body.Password)
 	if err != nil {
-		// 這裡要想辦法去區分是sql取資料的錯誤還是真的密碼沒過
+		// 這裡要想辦法去區分是sql取資料的錯誤，還是service層的錯誤，還是真的密碼沒過
 		return c.JSON(http.StatusUnauthorized, Response{
 			"message": err.Error(),
 		})
