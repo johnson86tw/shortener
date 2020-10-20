@@ -37,20 +37,30 @@ func (p *pgAccountRepo) Create(a *domain.Account) error {
 	return nil
 }
 
-// Fetch ...
-func (p *pgAccountRepo) Find(email string) (string, error) {
+// Find ...
+func (p *pgAccountRepo) Find(email string) (*domain.Account, error) {
 	sql := `
-	SELECT password
+	SELECT password, id
 	FROM users 
 	WHERE email = $1;`
 
-	var password string
-	err := p.conn.QueryRow(context.Background(), sql, email).Scan(&password)
+	acc := &domain.Account{}
+
+	rows, err := p.conn.Query(context.Background(), sql, email)
 	if err != nil {
-		return "", err
+		return acc, err
 	}
 
-	return password, nil
+	rows.Close()
+
+	for rows.Next() {
+		err := rows.Scan(&acc.Password, &acc.UserID)
+		if err != nil {
+			return acc, err
+		}
+	}
+
+	return acc, nil
 }
 
 // Update ...

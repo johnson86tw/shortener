@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/chnejohnson/shortener/domain"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -40,16 +41,16 @@ func (a *AccountService) Create(acc *domain.Account) error {
 }
 
 // Login ...
-func (a *AccountService) Login(email string, password string) error {
-	p, err := a.db.Find(email)
+func (a *AccountService) Login(email string, password string) (uuid.UUID, error) {
+	acc, err := a.db.Find(email)
 	if err != nil {
-		return err
+		return uuid.UUID{}, err
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(p), []byte(password))
+	err = bcrypt.CompareHashAndPassword([]byte(acc.Password), []byte(password))
 	if err != nil {
-		return err
+		return uuid.UUID{}, err
 	}
 
-	return nil
+	return acc.UserID, nil
 }

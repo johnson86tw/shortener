@@ -1,8 +1,10 @@
 # shortener
 
+### 重大
+
 ### 加入使用者客製化短網址
 - 建立新表 user_urls table
-- 如何用JWT知道使用者的uuid？
+- 如何用 JWT 知道使用者的 uuid？發 claim 時把 uuid 塞在裡面，authRequired 函式將其解開
 
 ### Bugs to be fixed
 - users table name need to be not null

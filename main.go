@@ -2,13 +2,12 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
+	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -18,9 +17,6 @@ import (
 
 	redirectRepo "github.com/chnejohnson/shortener/service/redirect/repository/postgres"
 	redirectService "github.com/chnejohnson/shortener/service/redirect/service"
-
-	userURLRepo "github.com/chnejohnson/shortener/service/user_url/repository/postgres"
-	userURLService "github.com/chnejohnson/shortener/service/user_url/service"
 
 	api "github.com/chnejohnson/shortener/api"
 )
@@ -76,43 +72,30 @@ func main() {
 		}
 	}()
 
+	engine := gin.Default()
+
 	// service
 	accountRepo := accountRepo.NewRepository(pgConn)
 	as := accountService.NewAccountService(accountRepo)
 	redirectRepo := redirectRepo.NewRepository(pgConn)
 	rs := redirectService.NewRedirectService(redirectRepo)
-
-	// api
-	engine := gin.Default()
 	api.NewAccountHandler(engine, as, j)
 	api.NewRedirectHandler(engine, rs)
 
-	// authorized := engine.Group("/auth")
-	// authorized.Use(j.AuthRequired)
+	// api
+	authorized := engine.Group("/login")
+	authorized.Use(j.AuthRequired)
 
-	// {
-	// 	authorized.GET("/profile", func(c *gin.Context) {
-	// 		c.JSON(http.StatusOK, gin.H{
-	// 			"message": "success",
-	// 		})
-	// 	})
-	// }
-	userURLRepo := userURLRepo.NewRepository(pgConn)
-	userURLService := userURLService.NewUserURLService(userURLRepo)
-
-	id, err := uuid.Parse("4425ff13-354f-4e45-897f-ac76476305d5")
-	if err != nil {
-		logrus.Error(err)
+	{
+		authorized.GET("/profile", func(c *gin.Context) {
+			c.JSON(http.StatusOK, gin.H{
+				"message": "success",
+			})
+		})
 	}
 
-	urls, err := userURLService.FetchAll(id)
-	if err != nil {
-		logrus.Error(err)
-	}
-
-	for _, u := range urls {
-		fmt.Println(*u)
-	}
+	// userURLRepo := userURLRepo.NewRepository(pgConn)
+	// userURLService := userURLService.NewUserURLService(userURLRepo)
 
 	engine.Run(serverAddr)
 }
@@ -121,3 +104,17 @@ func main() {
 // redisRepo := _redisRepo.NewRedisRedirectRepository(rdb)
 // rdbService := _redirectService.NewRedirectService(redisRepo)
 // _redirectHttpDelivery.NewRedirectHandler(g, rdbService)
+
+// id, err := uuid.Parse("4425ff13-354f-4e45-897f-ac76476305d5")
+// if err != nil {
+// 	logrus.Error(err)
+// }
+
+// urls, err := userURLService.FetchAll(id)
+// if err != nil {
+// 	logrus.Error(err)
+// }
+
+// for _, u := range urls {
+// 	fmt.Println(*u)
+// }

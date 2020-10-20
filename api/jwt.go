@@ -71,7 +71,7 @@ func (j *JWT) AuthRequired(c *gin.Context) {
 	}
 
 	if claims, ok := tokenClaims.Claims.(*Claims); ok && tokenClaims.Valid {
-		c.Set("account", claims.Account)
+		c.Set("userID", claims.Subject)
 		c.Set("role", claims.Role)
 		c.Next()
 	} else {

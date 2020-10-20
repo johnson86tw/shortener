@@ -75,7 +75,7 @@ func (h *AccountHandler) login(c *gin.Context) {
 	}
 
 	// service
-	err = h.Login(body.Email, body.Password)
+	uuid, err := h.Login(body.Email, body.Password)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"message": "Unauthorized",
@@ -89,8 +89,7 @@ func (h *AccountHandler) login(c *gin.Context) {
 	role := "Member"
 
 	claims := Claims{
-		Account: body.Email,
-		Role:    role,
+		Role: role,
 		StandardClaims: jwt.StandardClaims{
 			Audience:  body.Email,
 			ExpiresAt: now.Add(20 * time.Minute).Unix(),
@@ -98,7 +97,7 @@ func (h *AccountHandler) login(c *gin.Context) {
 			IssuedAt:  now.Unix(),
 			Issuer:    "ginJWT",
 			NotBefore: now.Add(10 * time.Second).Unix(),
-			Subject:   body.Email,
+			Subject:   uuid.String(),
 		},
 	}
 
