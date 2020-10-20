@@ -7,7 +7,8 @@ import (
 
 	"github.com/chnejohnson/shortener/domain"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo"
+	"github.com/sirupsen/logrus"
 )
 
 // AccountHandler ...
@@ -17,26 +18,24 @@ type AccountHandler struct {
 }
 
 // NewAccountHandler ...
-func NewAccountHandler(r *gin.Engine, as domain.AccountService, j *JWT) {
+func NewAccountHandler(app *echo.Echo, as domain.AccountService, j *JWT) {
 	h := &AccountHandler{as, j}
-	r.POST("/signup", h.signup)
-	r.POST("/login", h.login)
+	app.POST("/signup", h.signup)
+	app.POST("/login", h.login)
 }
 
 // Signup ...
-func (h *AccountHandler) signup(c *gin.Context) {
+func (h *AccountHandler) signup(c echo.Context) error {
 	var body struct {
-		Email    string
-		Password string
-		Name     string
+		Name     string `json:"name" form:"name" query:"name"`
+		Email    string `json:"email" form:"email" query:"email"`
+		Password string `json:"password" form:"password" query:"password"`
 	}
 
-	err := c.ShouldBindJSON(&body)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
+	if err := c.Bind(&body); err != nil {
+		return c.JSON(http.StatusBadRequest, Response{
 			"error": err.Error(),
 		})
-		return
 	}
 
 	acc := &domain.Account{}
@@ -44,58 +43,61 @@ func (h *AccountHandler) signup(c *gin.Context) {
 	acc.Password = body.Password
 	acc.Name = body.Name
 
-	err = h.Create(acc)
+	err := h.Create(acc)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
+		return c.JSON(http.StatusInternalServerError, Response{
 			"error": err.Error(),
 		})
-		return
+
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	return c.JSON(http.StatusOK, Response{
 		"message": "Success",
 	})
 
 }
 
 // Login ...
-func (h *AccountHandler) login(c *gin.Context) {
-
+func (h *AccountHandler) login(c echo.Context) error {
 	var body struct {
-		Email    string
-		Password string
+		Email    string `json:"email" form:"email" query:"email"`
+		Password string `json:"password" form:"password" query:"password"`
 	}
 
-	err := c.ShouldBindJSON(&body)
+	err := c.Bind(&body)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
+		return c.JSON(http.StatusBadRequest, Response{
 			"error": err.Error(),
 		})
-		return
 	}
+
+	logrus.WithFields(logrus.Fields{
+		"body":     body.Email,
+		"password": body.Password,
+	}).Info("Login Request body")
 
 	// service
 	uuid, err := h.Login(body.Email, body.Password)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"message": "Unauthorized",
+		// 這裡要想辦法去區分是sql取資料的錯誤還是真的密碼沒過
+		return c.JSON(http.StatusUnauthorized, Response{
+			"message": err.Error(),
 		})
-		return
+
 	}
 
 	// JWT
 	now := time.Now()
-	jwtID := body.Email + strconv.FormatInt(now.Unix(), 10)
+	jwtID := strconv.FormatInt(now.Unix(), 10)
 	role := "Member"
 
 	claims := Claims{
 		Role: role,
 		StandardClaims: jwt.StandardClaims{
-			Audience:  body.Email,
 			ExpiresAt: now.Add(20 * time.Minute).Unix(),
 			Id:        jwtID,
 			IssuedAt:  now.Unix(),
-			Issuer:    "ginJWT",
+			Issuer:    "johnson chen",
 			NotBefore: now.Add(10 * time.Second).Unix(),
 			Subject:   uuid.String(),
 		},
@@ -104,13 +106,13 @@ func (h *AccountHandler) login(c *gin.Context) {
 	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	token, err := tokenClaims.SignedString(h.JWTSecret)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
+		return c.JSON(http.StatusInternalServerError, Response{
 			"error": err.Error(),
 		})
-		return
+
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	return c.JSON(http.StatusOK, Response{
 		"token": token,
 	})
 

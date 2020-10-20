@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/chnejohnson/shortener/domain"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo"
 )
 
 // RedirectHandler ...
@@ -13,37 +13,36 @@ type RedirectHandler struct {
 }
 
 // NewRedirectHandler ...
-func NewRedirectHandler(engine *gin.Engine, rs domain.RedirectService) {
+func NewRedirectHandler(app *echo.Echo, rs domain.RedirectService) {
 	h := &RedirectHandler{rs}
-	engine.GET("/:code", h.redirect)
-	engine.POST("/", h.store)
+	app.GET("/:code", h.redirect)
+	app.POST("/", h.store)
 }
 
-func (r *RedirectHandler) redirect(c *gin.Context) {
-	code := c.Params.ByName("code")
+func (r *RedirectHandler) redirect(c echo.Context) error {
+	code := c.Param("code")
 
 	redirect, err := r.Find(code)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
+		return c.JSON(http.StatusInternalServerError, Response{
 			"error": "Fail to get redirect url",
 		})
-		return
 	}
 
-	c.Redirect(http.StatusFound, redirect.URL)
+	return c.Redirect(http.StatusFound, redirect.URL)
 }
 
-func (r *RedirectHandler) store(c *gin.Context) {
+func (r *RedirectHandler) store(c echo.Context) error {
 	var body struct {
 		URL string `json:"url" binding:"required"`
 	}
 
-	err := c.ShouldBindJSON(&body)
+	err := c.Bind(&body)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
+		return c.JSON(http.StatusBadRequest, Response{
 			"error": err.Error(),
 		})
-		return
+
 	}
 
 	redirect := &domain.Redirect{}
@@ -51,13 +50,12 @@ func (r *RedirectHandler) store(c *gin.Context) {
 
 	err = r.Store(redirect)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
+		return c.JSON(http.StatusInternalServerError, Response{
 			"error": err.Error(),
 		})
-		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	return c.JSON(http.StatusOK, Response{
 		"data": *redirect,
 	})
 

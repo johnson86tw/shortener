@@ -6,9 +6,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
 	"github.com/jackc/pgx/v4"
+	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
@@ -26,13 +27,6 @@ func init() {
 	err := viper.ReadInConfig()
 	if err != nil {
 		panic(err)
-	}
-
-	if viper.GetBool("debug") {
-		gin.SetMode("debug")
-		log.Println("Service run on develop mode")
-	} else {
-		gin.SetMode(gin.ReleaseMode)
 	}
 }
 
@@ -72,23 +66,27 @@ func main() {
 		}
 	}()
 
-	engine := gin.Default()
+	app := echo.New()
+
+	// middleware
+	app.Use(middleware.Logger())
+	app.Use(middleware.Recover())
 
 	// service
 	accountRepo := accountRepo.NewRepository(pgConn)
 	as := accountService.NewAccountService(accountRepo)
 	redirectRepo := redirectRepo.NewRepository(pgConn)
 	rs := redirectService.NewRedirectService(redirectRepo)
-	api.NewAccountHandler(engine, as, j)
-	api.NewRedirectHandler(engine, rs)
+	api.NewAccountHandler(app, as, j)
+	api.NewRedirectHandler(app, rs)
 
 	// api
-	authorized := engine.Group("/login")
-	authorized.Use(j.AuthRequired)
+	auth := app.Group("/auth")
+	auth.Use(j.AuthRequired)
 
 	{
-		authorized.GET("/profile", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{
+		auth.GET("/profile", func(c echo.Context) error {
+			return c.JSON(http.StatusOK, map[string]interface{}{
 				"message": "success",
 			})
 		})
@@ -96,8 +94,7 @@ func main() {
 
 	// userURLRepo := userURLRepo.NewRepository(pgConn)
 	// userURLService := userURLService.NewUserURLService(userURLRepo)
-
-	engine.Run(serverAddr)
+	app.Logger.Fatal(app.Start(serverAddr))
 }
 
 // compose redis

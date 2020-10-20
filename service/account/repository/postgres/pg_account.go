@@ -40,7 +40,7 @@ func (p *pgAccountRepo) Create(a *domain.Account) error {
 // Find ...
 func (p *pgAccountRepo) Find(email string) (*domain.Account, error) {
 	sql := `
-	SELECT password, id
+	SELECT password, user_id
 	FROM users 
 	WHERE email = $1;`
 
@@ -51,7 +51,7 @@ func (p *pgAccountRepo) Find(email string) (*domain.Account, error) {
 		return acc, err
 	}
 
-	rows.Close()
+	defer rows.Close()
 
 	for rows.Next() {
 		err := rows.Scan(&acc.Password, &acc.UserID)
