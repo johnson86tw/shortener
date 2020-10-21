@@ -117,23 +117,3 @@ func (h *AccountHandler) login(c echo.Context) error {
 	})
 
 }
-
-// // try
-// acc := &domain.Account{}
-// acc.Name = "Howard"
-// acc.Email = "howard@gmail.com"
-// acc.Password = "23"
-
-// err = as.Create(acc)
-// if err != nil {
-// 	logrus.Error(err)
-// } else {
-// 	logrus.Info("Succeed to sign up")
-// }
-
-// err = as.Login("howard@gmail.com", "23")
-// if err != nil {
-// 	logrus.Error(err)
-// } else {
-// 	logrus.Info("Succeed to login")
-// }

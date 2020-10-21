@@ -1,11 +1,9 @@
 # shortener
 
-### 最後兩個部份
-- redirect service Find 同時搜尋 urls and user_urls table，如果是 user_urls 的要紀錄 totalClick
+### todo
 - redis for caching
 
 ### issues to be fixed
-- users table name need to be not null
 
 ### References
 - [go-clean-arch](https://github.com/bxcodec/go-clean-arch)

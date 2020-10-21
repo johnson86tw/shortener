@@ -14,7 +14,7 @@ create extension "uuid-ossp";
 
 create table users (
 	user_id uuid not null default uuid_generate_v4(),
-	name varchar(64),
+	name varchar(64) not null,
 	email varchar(64) not null unique,
 	password varchar(64) not null ,
 	created_at timestamp not null default now(),
@@ -23,7 +23,9 @@ create table users (
 	primary key (user_id)
 );
 
-
+-- 更改 users name 為 not null
+update users set name = '' where name is null;
+alter table users alter column name set not null;
 
 -- 新增 user
 INSERT INTO public.users
@@ -50,7 +52,3 @@ create table user_urls (
 INSERT INTO user_urls (url, code, user_id) 
 VALUES('http://www.facebook.com', 'aiofjf', '4425ff13-354f-4e45-897f-ac76476305d5');
 
--- 取得特定 user 的 urls
-select id, url, code, created_at, total_click
-from user_urls 
-where user_id = '4425ff13-354f-4e45-897f-ac76476305d5';

@@ -18,9 +18,10 @@ import (
 	redirectRepo "github.com/chnejohnson/shortener/service/redirect/repository/postgres"
 	redirectService "github.com/chnejohnson/shortener/service/redirect/service"
 
-	api "github.com/chnejohnson/shortener/api"
 	userURLRepo "github.com/chnejohnson/shortener/service/user_url/repository/postgres"
 	userURLService "github.com/chnejohnson/shortener/service/user_url/service"
+
+	api "github.com/chnejohnson/shortener/api"
 )
 
 func init() {
@@ -74,7 +75,7 @@ func main() {
 	app.Use(middleware.Logger())
 	app.Use(middleware.Recover())
 
-	// basic
+	// service
 	accountRepo := accountRepo.NewRepository(pgConn)
 	as := accountService.NewAccountService(accountRepo)
 	userURLRepo := userURLRepo.NewRepository(pgConn)
@@ -82,6 +83,7 @@ func main() {
 	redirectRepo := redirectRepo.NewRepository(pgConn)
 	rs := redirectService.NewRedirectService(redirectRepo, userURLRepo)
 
+	// api
 	api.NewAccountHandler(app, as, j)
 	api.NewRedirectHandler(app, rs)
 
