@@ -22,7 +22,7 @@ func NewRedirectHandler(app *echo.Echo, rs domain.RedirectService) {
 func (r *RedirectHandler) redirect(c echo.Context) error {
 	code := c.Param("code")
 
-	redirect, err := r.Find(code)
+	redirect, err := r.Redirect(code)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, Response{
 			"error": "Fail to get redirect url",

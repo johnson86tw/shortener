@@ -77,8 +77,10 @@ func main() {
 	// basic
 	accountRepo := accountRepo.NewRepository(pgConn)
 	as := accountService.NewAccountService(accountRepo)
+	userURLRepo := userURLRepo.NewRepository(pgConn)
+	us := userURLService.NewUserURLService(userURLRepo)
 	redirectRepo := redirectRepo.NewRepository(pgConn)
-	rs := redirectService.NewRedirectService(redirectRepo)
+	rs := redirectService.NewRedirectService(redirectRepo, userURLRepo)
 
 	api.NewAccountHandler(app, as, j)
 	api.NewRedirectHandler(app, rs)
@@ -87,8 +89,6 @@ func main() {
 	auth := app.Group("/auth")
 	auth.Use(j.AuthRequired)
 	{
-		userURLRepo := userURLRepo.NewRepository(pgConn)
-		us := userURLService.NewUserURLService(userURLRepo)
 		api.NewUserURLHandler(auth, us)
 	}
 

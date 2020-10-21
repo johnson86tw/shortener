@@ -73,3 +73,18 @@ func (p *pgUserURLRepository) FetchAll(userID uuid.UUID) ([]*domain.UserURL, err
 	return urls, nil
 
 }
+
+func (p *pgUserURLRepository) AddTotalClick(code string) error {
+	sql := `
+		UPDATE user_urls
+		SET total_click = total_click + 1
+		WHERE code = $1;
+	`
+	_, err := p.conn.Exec(context.Background(), sql, code)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}

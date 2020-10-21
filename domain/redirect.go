@@ -2,21 +2,23 @@ package domain
 
 import (
 	"time"
+
+	"github.com/google/uuid"
 )
 
 // Redirect ...
 type Redirect struct {
-	URL         string    `json:"url"`
-	Code        string    `json:"code"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time
-	TotalClicks int
-	Owner       int
+	URL        string    `json:"url"`
+	Code       string    `json:"code"`
+	CreatedAt  time.Time `json:"createdAt"`
+	UpdatedAt  time.Time
+	TotalClick int
+	UserID     uuid.UUID
 }
 
 // RedirectService ...
 type RedirectService interface {
-	Find(string) (*Redirect, error)
+	Redirect(code string) (*Redirect, error)
 	Store(*Redirect) error
 }
 

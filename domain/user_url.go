@@ -29,6 +29,7 @@ type UserURLService interface {
 type UserURLRepository interface {
 	Find(code string) (string, error)
 	FetchAll(userID uuid.UUID) ([]*UserURL, error)
+	AddTotalClick(code string) error
 	// Add(userID string, url *UserURL) error
 	// Update(*UserURL) error
 	// Delete(code string) error

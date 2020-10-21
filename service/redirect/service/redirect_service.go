@@ -7,27 +7,36 @@ import (
 	"time"
 
 	"github.com/chnejohnson/shortener/domain"
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 )
 
 // RedirectService ...
 type RedirectService struct {
-	db domain.RedirectRepository
+	db        domain.RedirectRepository
+	userURLDB domain.UserURLRepository
 }
 
 // NewRedirectService ...
-func NewRedirectService(db domain.RedirectRepository) domain.RedirectService {
-	return &RedirectService{db}
+func NewRedirectService(db domain.RedirectRepository, userURLDB domain.UserURLRepository) domain.RedirectService {
+	return &RedirectService{db, userURLDB}
 }
 
 // Find ...
-func (r *RedirectService) Find(code string) (*domain.Redirect, error) {
-	rdrt, err := r.db.Find(code)
+func (r *RedirectService) Redirect(code string) (*domain.Redirect, error) {
+	redirect, err := r.db.Find(code)
 	if err != nil {
 		return nil, err
 	}
 
-	return rdrt, nil
+	u := new(uuid.UUID)
+
+	// record totalclick
+	if redirect.UserID != *u {
+		r.userURLDB.AddTotalClick(code)
+	}
+
+	return redirect, nil
 }
 
 // Store ...

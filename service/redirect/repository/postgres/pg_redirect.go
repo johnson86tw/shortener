@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/chnejohnson/shortener/domain"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
 	"github.com/sirupsen/logrus"
 )
@@ -18,17 +19,27 @@ func NewRepository(conn *pgx.Conn) domain.RedirectRepository {
 }
 
 func (p *pgRedirectRepository) Find(code string) (*domain.Redirect, error) {
-	sql := "SELECT url, created_at FROM urls WHERE code=$1;"
+	sql := `
+		SELECT u.url, total_click, user_id 
+		FROM (SELECT url, code FROM urls union SELECT url, code FROM user_urls) AS u
+		LEFT OUTER JOIN user_urls uu
+		ON uu.code = u.code
+		WHERE u.code = $1;`
 
 	redirect := &domain.Redirect{}
-	redirect.Code = code
-	err := p.conn.QueryRow(context.Background(), sql, code).Scan(&redirect.URL, &redirect.CreatedAt)
+	var totalClick *int
+	var userID *uuid.UUID
+
+	err := p.conn.QueryRow(context.Background(), sql, code).Scan(&redirect.URL, &totalClick, &userID)
 	if err != nil {
-		logrus.Error(err)
 		return nil, err
 	}
 
-	logrus.WithFields(logrus.Fields{"url": redirect.URL, "created_at": redirect.CreatedAt}).Info("Succeed to find redirect")
+	if userID != nil && totalClick != nil {
+		redirect.TotalClick = *totalClick
+		redirect.UserID = *userID
+	}
+
 	return redirect, nil
 }
 
