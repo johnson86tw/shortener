@@ -2,14 +2,14 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"io/ioutil"
 	"log"
 	"strings"
 
-	"github.com/go-redis/redis"
 	"github.com/jackc/pgx/v4"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
 	accountRepo "github.com/chnejohnson/shortener/service/account/repository/postgres"
@@ -33,22 +33,11 @@ func init() {
 }
 
 func main() {
-	redisAddr := viper.GetString("redis.address")
 	serverAddr := viper.GetString("server.address")
 	pgConfig := viper.GetStringMapString("pg")
 	jwtSecret := viper.GetString("jwt.secret")
 
 	j := &api.JWT{JWTSecret: []byte(jwtSecret)}
-
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     redisAddr,
-		Password: "", // no password set
-		DB:       0,  // use default DB
-	})
-
-	if _, err := rdb.Ping().Result(); err != nil {
-		logrus.Warn("Cannot connect to redis")
-	}
 
 	dsn := []string{}
 	for key, val := range pgConfig {
@@ -95,4 +84,13 @@ func main() {
 	}
 
 	app.Logger.Fatal(app.Start(serverAddr))
+}
+
+func writeRoutesFile(app *echo.Echo) error {
+	data, err := json.MarshalIndent(app.Routes(), "", "  ")
+	if err != nil {
+		return err
+	}
+	ioutil.WriteFile("routes.json", data, 0644)
+	return nil
 }

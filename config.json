@@ -3,13 +3,11 @@
   "server": {
     "address": ":4000"
   },
-  "redis": {
-    "address": "localhost:6379"
-  },
   "pg": {
-    "user": "postgres",
-    "password": "0",
-    "host": "localhost",
+    "user": "root",
+    "password": "root",
+    "database": "postgres",
+    "host": "db",
     "port": 5432
   },
   "jwt": {

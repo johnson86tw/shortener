@@ -1,10 +1,11 @@
-version: "3.1"
+version: "3.6"
 
 services:
   web:
     build: .
     ports:
       - "443:4000"
+    restart: on-failure
     depends_on:
       - redis
       - db
@@ -13,6 +14,8 @@ services:
       - db
     networks:
       - backend
+    volumes:
+      - ./config.json:/config.json
   redis:
     image: redis
     ports:
@@ -20,11 +23,13 @@ services:
     networks:
       - backend
   db:
-    image: postgres
+    image: postgres:13
     ports:
       - 5432:5432
+    restart: on-failure
     environment:
-      POSTGRES_PASSWORD: 0
+      POSTGRES_PASSWORD: "root"
+      POSTGRES_USER: "root"
     networks:
       - backend
     volumes:
