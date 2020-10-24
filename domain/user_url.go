@@ -14,23 +14,23 @@ type UserURL struct {
 	UpdatedAt  time.Time
 	DeletedAt  time.Time
 	TotalClick int
-	UserID     string
+	UserID     uuid.UUID
 }
 
-// UserRedirectService ...
+// UserURLService ...
 type UserURLService interface {
 	FetchAll(userID uuid.UUID) ([]*UserURL, error)
-	// Add(userID string, url *UserURL) error
+	AddURL(*UserURL) error
 	// Edit(code string) error
 	// Delete(code string) error
 }
 
-// UserRedirectRepository ...
+// UserURLRepository ...
 type UserURLRepository interface {
 	Find(code string) (string, error)
 	FetchAll(userID uuid.UUID) ([]*UserURL, error)
 	AddTotalClick(code string) error
-	// Add(userID string, url *UserURL) error
+	AddURL(*UserURL) error
 	// Update(*UserURL) error
 	// Delete(code string) error
 }

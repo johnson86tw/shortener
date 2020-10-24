@@ -1,12 +1,10 @@
 package service
 
 import (
-	"encoding/hex"
 	"errors"
-	"math/rand"
-	"time"
 
 	"github.com/chnejohnson/shortener/domain"
+	"github.com/chnejohnson/shortener/utils"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 )
@@ -22,7 +20,7 @@ func NewRedirectService(db domain.RedirectRepository, userURLDB domain.UserURLRe
 	return &RedirectService{db, userURLDB}
 }
 
-// Find ...
+// Redirect ...
 func (r *RedirectService) Redirect(code string) (*domain.Redirect, error) {
 	redirect, err := r.db.Find(code)
 	if err != nil {
@@ -46,7 +44,7 @@ func (r *RedirectService) Store(redirect *domain.Redirect) error {
 		return errors.New("Redirect URL should not be empty")
 	}
 	// make redirect code
-	code := genURLCode()
+	code := utils.GenURLCode()
 	logrus.WithField("code", code).Info("URL code has been generated")
 
 	redirect.Code = code
@@ -58,15 +56,4 @@ func (r *RedirectService) Store(redirect *domain.Redirect) error {
 	}
 
 	return nil
-}
-
-func genURLCode() string {
-	seed := time.Now().UnixNano()
-	source := rand.NewSource(seed)
-	r := rand.New(source)
-
-	b := make([]byte, 4)
-	r.Read(b)
-	s := hex.EncodeToString(b)
-	return s
 }

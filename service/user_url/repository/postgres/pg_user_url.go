@@ -6,12 +6,14 @@ import (
 	"github.com/chnejohnson/shortener/domain"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
+	"github.com/sirupsen/logrus"
 )
 
 type pgUserURLRepository struct {
 	conn *pgx.Conn
 }
 
+// NewRepository ...
 func NewRepository(conn *pgx.Conn) domain.UserURLRepository {
 	return &pgUserURLRepository{conn}
 }
@@ -74,6 +76,7 @@ func (p *pgUserURLRepository) FetchAll(userID uuid.UUID) ([]*domain.UserURL, err
 
 }
 
+// AddTotalClick ...
 func (p *pgUserURLRepository) AddTotalClick(code string) error {
 	sql := `
 		UPDATE user_urls
@@ -87,4 +90,23 @@ func (p *pgUserURLRepository) AddTotalClick(code string) error {
 
 	return nil
 
+}
+
+// AddURL ...
+func (p *pgUserURLRepository) AddURL(uu *domain.UserURL) error {
+	sql := `
+		INSERT INTO user_urls (url, code, user_id) 
+		VALUES($1, $2, $3);`
+
+	_, err := p.conn.Exec(context.Background(), sql, uu.URL, uu.Code, uu.UserID)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"url":    uu.URL,
+			"code":   uu.Code,
+			"userID": uu.UserID,
+		}).Error("Fail to insert data into postgres")
+		return err
+	}
+
+	return nil
 }
