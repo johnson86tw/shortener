@@ -58,11 +58,15 @@ func main() {
 	}()
 
 	// web framework
-	app := echo.New()
+	e := echo.New()
 
 	// middleware
-	app.Use(middleware.Logger())
-	app.Use(middleware.Recover())
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"http://localhost"},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	}))
 
 	// service
 	accountRepo := accountRepo.NewRepository(pgConn)
@@ -73,6 +77,8 @@ func main() {
 	rs := redirectService.NewRedirectService(redirectRepo, userURLRepo)
 
 	// api
+	app := e.Group("/api")
+
 	api.NewAccountHandler(app, as, j)
 	api.NewRedirectHandler(app, rs)
 
@@ -83,7 +89,7 @@ func main() {
 		api.NewUserURLHandler(auth, us)
 	}
 
-	app.Logger.Fatal(app.Start(serverAddr))
+	e.Logger.Fatal(e.Start(serverAddr))
 }
 
 func writeRoutesFile(app *echo.Echo) error {

@@ -18,7 +18,7 @@ type AccountHandler struct {
 }
 
 // NewAccountHandler ...
-func NewAccountHandler(app *echo.Echo, as domain.AccountService, j *JWT) {
+func NewAccountHandler(app *echo.Group, as domain.AccountService, j *JWT) {
 	h := &AccountHandler{as, j}
 	app.POST("/signup", h.signup)
 	app.POST("/login", h.login)

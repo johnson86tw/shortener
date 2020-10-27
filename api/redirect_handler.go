@@ -13,7 +13,7 @@ type RedirectHandler struct {
 }
 
 // NewRedirectHandler ...
-func NewRedirectHandler(app *echo.Echo, rs domain.RedirectService) {
+func NewRedirectHandler(app *echo.Group, rs domain.RedirectService) {
 	h := &RedirectHandler{rs}
 	app.GET("/:code", h.redirect)
 	app.POST("/", h.store)
