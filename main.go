@@ -77,16 +77,18 @@ func main() {
 	rs := redirectService.NewRedirectService(redirectRepo, userURLRepo)
 
 	// api
-	app := e.Group("/api")
-
-	api.NewAccountHandler(app, as, j)
-	api.NewRedirectHandler(app, rs)
-
-	// auth
-	auth := app.Group("/auth")
-	auth.Use(j.AuthRequired)
+	router := e.Group("/api")
 	{
-		api.NewUserURLHandler(auth, us)
+		api.NewAccountHandler(router, as, j)
+		api.NewRedirectHandler(router, rs)
+
+		// auth
+		auth := router.Group("/auth")
+		auth.Use(j.AuthRequired)
+		{
+			api.NewUserURLHandler(auth, us)
+		}
+
 	}
 
 	e.Logger.Fatal(e.Start(serverAddr))
