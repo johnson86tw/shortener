@@ -15,7 +15,8 @@ services:
     networks:
       - backend
     volumes:
-      - ./config.json:/config.json
+      - .:/app
+    command: go run main.go
   redis:
     image: redis
     ports:
