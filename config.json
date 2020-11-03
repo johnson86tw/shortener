@@ -4,8 +4,8 @@
     "address": ":4000"
   },
   "pg": {
-    "user": "root",
-    "password": "root",
+    "user": "postgres",
+    "password": "0",
     "database": "postgres",
     "host": "db",
     "port": 5432
