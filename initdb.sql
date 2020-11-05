@@ -1,3 +1,5 @@
+\c postgres
+
 create table urls (
 	url_id	serial not null unique,
 	url	text,
