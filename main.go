@@ -2,15 +2,17 @@ package main
 
 import (
 	"context"
-	"encoding/json"
-	"io/ioutil"
 	"log"
+	"os"
+	"strconv"
 	"strings"
 
 	"github.com/jackc/pgx/v4"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/spf13/viper"
+
+	_ "github.com/joho/godotenv/autoload"
 
 	accountRepo "github.com/chnejohnson/shortener/service/account/repository/postgres"
 	accountService "github.com/chnejohnson/shortener/service/account/service"
@@ -33,11 +35,15 @@ func init() {
 }
 
 func main() {
-	serverAddr := viper.GetString("server.address")
-	pgConfig := viper.GetStringMapString("pg")
+	// JWT
 	jwtSecret := viper.GetString("jwt.secret")
-
 	j := &api.JWT{JWTSecret: []byte(jwtSecret)}
+
+	// Postgres
+	pgConfig := viper.GetStringMapString("pg")
+	if b, _ := strconv.ParseBool(os.Getenv("DEBUG")); b {
+		pgConfig["host"] = "127.0.0.1"
+	}
 
 	dsn := []string{}
 	for key, val := range pgConfig {
@@ -91,14 +97,5 @@ func main() {
 
 	}
 
-	e.Logger.Fatal(e.Start(serverAddr))
-}
-
-func writeRoutesFile(app *echo.Echo) error {
-	data, err := json.MarshalIndent(app.Routes(), "", "  ")
-	if err != nil {
-		return err
-	}
-	ioutil.WriteFile("routes.json", data, 0644)
-	return nil
+	e.Logger.Fatal(e.Start(viper.GetString("server.address")))
 }

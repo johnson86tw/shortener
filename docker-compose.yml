@@ -6,6 +6,8 @@ services:
     ports:
       - "443:4000"
     restart: on-failure
+    environment:
+      DEBUG: "false"
     depends_on:
       - redis
       - db
@@ -14,9 +16,6 @@ services:
       - db
     networks:
       - backend
-    volumes:
-      - .:/app
-    command: go run main.go
   redis:
     image: redis
     ports:

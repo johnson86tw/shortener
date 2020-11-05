@@ -7,7 +7,9 @@
 - POST /auth/url      // add custom url by authorized user: require url and token
 - GET /auth/urls      // get all urls by authorized user: require token
 
-### Run
+### Guild
+- web 的 env DEBUG=true 用於 docker-compose，專案開發中的時候，自訂 .env DEBUG 為 true 時，即可 go run main.go port 4000
+- 正式站重 build web image，開發時可在本機 run go 連接 docker-compose 的 db 和 redis
 
 ```
 docker-compose up -d
@@ -33,7 +35,6 @@ docker-compose up -d
 
 ### Issues
 - 通用的 redirect 有重複的 url 就用舊的就好，不必再新增檔案
-- 要怎麼做到儲存程式碼後自動更新 docker-compose 的 web？
 - url 最後面多一撇也要可以使用
 - db 的錯誤訊息要處理掉
 - logout 後 token 要 revoked

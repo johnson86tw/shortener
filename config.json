@@ -1,11 +1,10 @@
 {
-  "debug": true,
   "server": {
     "address": ":4000"
   },
   "pg": {
-    "user": "postgres",
-    "password": "0",
+    "user": "root",
+    "password": "root",
     "database": "postgres",
     "host": "db",
     "port": 5432
