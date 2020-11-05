@@ -20,7 +20,7 @@ type JWT struct {
 	JWTSecret []byte
 }
 
-// AuthRequired ...
+// AuthRequired is a middleware for account service
 func (j *JWT) AuthRequired(next echo.HandlerFunc) echo.HandlerFunc {
 
 	return func(c echo.Context) error {

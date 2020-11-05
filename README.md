@@ -32,9 +32,8 @@ docker-compose up -d
 - 在 UserURL - FetchAll 當 handler 不想要回傳 UserID，但 domain.UserURL 有 UserID 的欄位，要怎麼隱藏？
 
 ### Issues
-- 通用的 redirect 有重複的 url 就用舊的就好，不必再新增檔案
 - url 最後面多一撇也要可以使用
-- db 的錯誤訊息要處理掉
+- 錯誤訊息要處理掉: ex. 尚未建立 table, login 的 bcrypt 錯誤
 - logout 後 token 要 revoked
 - config 自成一個 package 處理，要支援 .env 檔，有 env 用 env，沒有的話就用 config.json
 - add Testing
@@ -43,3 +42,6 @@ docker-compose up -d
 ### 一些寫作原則
 - log 盡量都寫在 service 層
 - 將 model 隱藏於 json 的方法： `json:"-"` 或 小寫的 struct field
+- 檔名寫清楚： xxx_handler, pg_xxx, xxx_service
+- db 的錯誤訊息要在 repo 層處理
+- api 層與 service 層可以用指標的方式賦值，db 層的 input 則盡量單純
