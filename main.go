@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v4"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -26,7 +27,17 @@ import (
 	api "github.com/chnejohnson/shortener/api"
 )
 
+var mode string
+
 func init() {
+	if d, _ := strconv.ParseBool(os.Getenv("DEBUG")); !d {
+		mode = "production"
+	} else {
+		mode = "development"
+	}
+
+	log.Info(fmt.Sprintf("App is running on %s mode", mode))
+
 	viper.SetConfigFile("config.json")
 	err := viper.ReadInConfig()
 	if err != nil {
@@ -41,7 +52,8 @@ func main() {
 
 	// Postgres
 	pgConfig := viper.GetStringMapString("pg")
-	if b, _ := strconv.ParseBool(os.Getenv("DEBUG")); b {
+
+	if mode == "development" {
 		pgConfig["host"] = "127.0.0.1"
 	}
 

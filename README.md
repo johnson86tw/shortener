@@ -14,8 +14,6 @@
 ```
 docker-compose up -d
 ```
-
-- DB table 需手動建立，請參考 initdb.sql
 - localhost:443
 
 ### Future add-on
@@ -41,7 +39,3 @@ docker-compose up -d
 - config 自成一個 package 處理，要支援 .env 檔，有 env 用 env，沒有的話就用 config.json
 - add Testing
 - 客製化 user_url
-
-
-### docker problem
-我試圖在 docker-compose 的 db volume 多加一行 [initdb.sql](https://stackoverflow.com/questions/60457838/docker-compose-postgres-docker-entrypoint-initdb-d-init-sql-permission-deni)，但是出現權限不足的問題，只好手動建立 table。 
