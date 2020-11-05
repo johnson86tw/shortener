@@ -24,14 +24,17 @@ func NewRedirectService(db domain.RedirectRepository, userURLDB domain.UserURLRe
 func (r *RedirectService) Redirect(code string) (*domain.Redirect, error) {
 	redirect, err := r.db.Find(code)
 	if err != nil {
-		return nil, err
+		return &domain.Redirect{}, err
 	}
 
 	u := new(uuid.UUID)
 
 	// record totalclick
 	if redirect.UserID != *u {
-		r.userURLDB.AddTotalClick(code)
+		if err := r.userURLDB.AddTotalClick(code); err != nil {
+			return &domain.Redirect{}, err
+		}
+
 	}
 
 	return redirect, nil

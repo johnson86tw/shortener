@@ -44,4 +44,4 @@ docker-compose up -d
 - 將 model 隱藏於 json 的方法： `json:"-"` 或 小寫的 struct field
 - 檔名寫清楚： xxx_handler, pg_xxx, xxx_service
 - db 的錯誤訊息要在 repo 層處理
-- api 層與 service 層可以用指標的方式賦值，db 層的 input 則盡量單純
+- api 層與 service 層可以用指標的方式賦值，db 層的 input 則盡量單純；但模仿的專案是讓 service 層同 db 層一樣單純，盡量不傳 struct 作為參數
