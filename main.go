@@ -86,6 +86,7 @@ func main() {
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 	}))
 
+	e.Pre(middleware.RemoveTrailingSlash())
 	// service
 	accountRepo := accountRepo.NewRepository(pgConn)
 	as := accountService.NewAccountService(accountRepo)

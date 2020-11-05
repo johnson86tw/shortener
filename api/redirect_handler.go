@@ -16,7 +16,7 @@ type RedirectHandler struct {
 func NewRedirectHandler(app *echo.Group, rs domain.RedirectService) {
 	h := &RedirectHandler{rs}
 	app.GET("/:code", h.redirect)
-	app.POST("/", h.store)
+	app.POST("", h.store)
 }
 
 func (r *RedirectHandler) redirect(c echo.Context) error {
