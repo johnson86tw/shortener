@@ -55,3 +55,28 @@ func (p *pgRedirectRepository) Store(redirect *domain.Redirect) error {
 	logrus.Info("Succeed to store redirect into database")
 	return nil
 }
+
+func (p *pgRedirectRepository) FindByURL(url string) (*domain.Redirect, error) {
+	sql := "SELECT code FROM urls WHERE url = $1"
+
+	redirect := &domain.Redirect{}
+	rows, err := p.conn.Query(context.Background(), sql, url)
+	if err != nil {
+		return redirect, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		err := rows.Scan(&redirect.Code)
+		if err != nil {
+			return redirect, err
+		}
+
+		// 只取第一個
+		break
+	}
+
+	return redirect, nil
+
+}

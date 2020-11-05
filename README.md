@@ -39,3 +39,7 @@ docker-compose up -d
 - config 自成一個 package 處理，要支援 .env 檔，有 env 用 env，沒有的話就用 config.json
 - add Testing
 - 客製化 user_url
+
+### 一些寫作原則
+- log 盡量都寫在 service 層
+- 將 model 隱藏於 json 的方法： `json:"-"` 或 小寫的 struct field

@@ -10,10 +10,10 @@ import (
 type Redirect struct {
 	URL        string    `json:"url"`
 	Code       string    `json:"code"`
-	CreatedAt  time.Time `json:"createdAt"`
-	UpdatedAt  time.Time
-	TotalClick int
-	UserID     uuid.UUID
+	CreatedAt  time.Time `json:"-"`
+	UpdatedAt  time.Time `json:"-"`
+	TotalClick int       `json:"-"`
+	UserID     uuid.UUID `json:"-"`
 }
 
 // RedirectService ...
@@ -24,6 +24,7 @@ type RedirectService interface {
 
 // RedirectRepository ...
 type RedirectRepository interface {
-	Find(string) (*Redirect, error)
+	Find(code string) (*Redirect, error)
 	Store(*Redirect) error
+	FindByURL(url string) (*Redirect, error)
 }
