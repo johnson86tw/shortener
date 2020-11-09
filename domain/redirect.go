@@ -18,7 +18,7 @@ type Redirect struct {
 
 // RedirectService ...
 type RedirectService interface {
-	Redirect(code string) (*Redirect, error)
+	Redirect(code string) (string, error)
 	Store(*Redirect) error
 }
 

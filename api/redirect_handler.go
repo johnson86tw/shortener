@@ -22,14 +22,14 @@ func NewRedirectHandler(app *echo.Group, rs domain.RedirectService) {
 func (r *RedirectHandler) redirect(c echo.Context) error {
 	code := c.Param("code")
 
-	redirect, err := r.Redirect(code)
+	url, err := r.Redirect(code)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, Response{
 			"error": "Fail to get redirect url",
 		})
 	}
 
-	return c.Redirect(http.StatusFound, redirect.URL)
+	return c.Redirect(http.StatusFound, url)
 }
 
 func (r *RedirectHandler) store(c echo.Context) error {

@@ -45,3 +45,4 @@ docker-compose up -d
 - 檔名寫清楚： xxx_handler, pg_xxx, xxx_service
 - db 的錯誤訊息要在 repo 層處理
 - api 層與 service 層可以用指標的方式賦值，db 層的 input 則盡量單純；但模仿的專案是讓 service 層同 db 層一樣單純，盡量不傳 struct 作為參數
+- struct如果是pointer可以使用nil，但nil的壞處是在取field的值時如果是nil就會噴錯，因此，service層能回傳值就回傳值就好，除非input指標進來output指標出去，否則選擇傳值。如果是傳指標，也不要用nil回傳，回傳該struct的預設值的指標比較好。

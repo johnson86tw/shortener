@@ -21,10 +21,10 @@ func NewRedirectService(db domain.RedirectRepository, userURLDB domain.UserURLRe
 }
 
 // Redirect ...
-func (r *RedirectService) Redirect(code string) (*domain.Redirect, error) {
+func (r *RedirectService) Redirect(code string) (string, error) {
 	redirect, err := r.db.Find(code)
 	if err != nil {
-		return &domain.Redirect{}, err
+		return "", err
 	}
 
 	u := new(uuid.UUID)
@@ -32,12 +32,11 @@ func (r *RedirectService) Redirect(code string) (*domain.Redirect, error) {
 	// record totalclick
 	if redirect.UserID != *u {
 		if err := r.userURLDB.AddTotalClick(code); err != nil {
-			return &domain.Redirect{}, err
+			return "", err
 		}
-
 	}
 
-	return redirect, nil
+	return redirect.URL, nil
 }
 
 // Store store the general url into database, if url exists, assigning exist code to Redirect

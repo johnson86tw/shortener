@@ -26,9 +26,9 @@ func TestRedirect(t *testing.T) {
 
 		rs := redirectService.NewRedirectService(mockRedirectRepository, mockUserURLRepository)
 
-		redirect, err := rs.Redirect("123456")
+		url, err := rs.Redirect("123456")
 		assert.NoError(t, err)
-		assert.NotEmpty(t, redirect.URL)
+		assert.NotEmpty(t, url)
 
 		mockRedirectRepository.AssertExpectations(t)
 		// 取出的 redirect 沒有 uuid，不可發動 AddTotalClick
@@ -47,9 +47,9 @@ func TestRedirect(t *testing.T) {
 
 		rs := redirectService.NewRedirectService(mockRedirectRepository, mockUserURLRepository)
 
-		redirect, err := rs.Redirect("123456")
+		url, err := rs.Redirect("123456")
 		assert.NoError(t, err)
-		assert.NotEmpty(t, redirect.URL)
+		assert.NotEmpty(t, url)
 
 		mockRedirectRepository.AssertExpectations(t)
 		// 取出的 redirect 有 uuid，必須發動 AddTotalClick
@@ -67,9 +67,9 @@ func TestRedirect(t *testing.T) {
 
 		rs := redirectService.NewRedirectService(mockRedirectRepository, mockUserURLRepository)
 
-		redirect, err := rs.Redirect("123456")
+		url, err := rs.Redirect("123456")
 		assert.Error(t, err)
-		assert.Empty(t, redirect)
+		assert.Empty(t, url)
 
 		mockRedirectRepository.AssertExpectations(t)
 	})
@@ -86,9 +86,9 @@ func TestRedirect(t *testing.T) {
 
 		rs := redirectService.NewRedirectService(mockRedirectRepository, mockUserURLRepository)
 
-		redirect, err := rs.Redirect("123456")
+		url, err := rs.Redirect("123456")
 		assert.Error(t, err)
-		assert.Equal(t, &domain.Redirect{}, redirect)
+		assert.Empty(t, url)
 
 		mockRedirectRepository.AssertExpectations(t)
 		mockUserURLRepository.AssertExpectations(t)
